@@ -208,7 +208,7 @@ class UserController extends Controller
        public function roleindex()
        {
         $roles = Role::all();
-        return view('admin.user.roleindex',complact('roles'));
+        return view('admin.user.roleindex',compact('roles'));
        }
    
     
