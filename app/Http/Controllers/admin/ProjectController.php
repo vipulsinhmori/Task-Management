@@ -1,11 +1,9 @@
 <?php
-
 namespace App\Http\Controllers\admin;
-
 use App\Models\Project;
 use App\Models\ProjectStatus;
 use App\Models\User;
-
+use App\Models\Meta;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -15,19 +13,18 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->role_id === 1) {
+        if (Auth::user()->role_id === 1 || Auth::user()->role_id === 3) {
             $statuses = ProjectStatus::all();
+            $meta = Meta::where('page_name', 'Project')->get();
             $projects = Project::with('creator')->get();
-       
-
-
-            return view('admin.project.index', compact('projects', 'statuses'));
+            
+            return view('admin.project.index', compact('projects', 'statuses',  'meta'));
         }
         return redirect()->route('dashboard/index')->with('error', 'Access Denied');
     }
     public function create()
     {
-        if (Auth::user()->role_id === 1) {
+        if (Auth::user()->role_id === 1 || Auth::user()->role_id === 3 ) {
             $admin = Auth::user();
             return view('admin.project.create', compact('admin'));
         }
@@ -53,10 +50,10 @@ class ProjectController extends Controller
     }
     public function edit($encodedId)
     {
-        if (Auth::user()->role_id === 1) {
+        if (Auth::user()->role_id === 1 || Auth::user()->role_id === 3) {
             $id = Crypt::decrypt($encodedId);
             $project = Project::findOrFail($id);
-            $created_by = User::where('role_id', 1)->get();
+            $created_by = User::whereIn('role_id', [1,3])->get();
             return view('admin.project.edit', compact('project', 'created_by'));
         }
     }
@@ -97,7 +94,4 @@ class ProjectController extends Controller
         }
         return redirect()->back()->with('success', 'Project status updated successfully.');
     }
-     
-    
-    
 }

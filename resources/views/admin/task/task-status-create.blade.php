@@ -23,8 +23,10 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label class="form-label" for="name">Status Name <span class="text-danger">*</span></label>
-                             <input type="text" class="form-control" name="name" placeholder="Enter Status Name..." value="{{ old('name') }}">
+                                <label class="form-label" for="name">Status Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" placeholder="Enter Status Name..."
+                                    value="{{ old('name') }}">
 
                                 @error('name')
                                     <div class="text-danger">{{ $message }}</div>
@@ -43,5 +45,4 @@
         </div>
     </div>
     </div>
-
 @endsection

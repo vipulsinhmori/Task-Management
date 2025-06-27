@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Task;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
 
 class AuthenticationController extends Controller
@@ -13,8 +16,8 @@ class AuthenticationController extends Controller
     public function index()
     {
         if (Auth::check()) {
-         
-            return redirect()->route('dashboard/index' );
+
+            return redirect()->route('dashboard/index');
         }
         return view('admin.Auth.login');
     }
@@ -58,8 +61,34 @@ class AuthenticationController extends Controller
     }
     public function dashboard()
     {
-           $users =  User::all();
-        return view('index',compact('users'));
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Access Denied: Please log in.');
+        }
+        $user = Auth::user();
+        if ($user->role_id == 2) {
+            $users = collect([$user]);
+            $taskes = Task::with(['project', 'assignedTo', 'creator', 'status'])->where('assigned_to', $user->id)->get();
+            // $project = Project::with(['assignedTo'])->where($user->id)->get();
+            // dd(  $project->toArray());  
+        } else {
+            $users = User::all();
+            $taskes = Task::with(['project', 'assignedTo', 'creator', 'status'])->get();
+            $project = Project::all();
+        }
+        $pendingCount = Task::where('status', 1)->count();
+        $inProgressCount = Task::where('status', 2)->count();
+        $completedCount = Task::where('status', 3)->count();
+        $totalCount = Task::count();
+
+        return view('index', [
+            'users' => $users,
+            // 'project' => $project,
+            'taskes' => $taskes,
+            'pendingCount' => $pendingCount,
+            'inProgressCount' => $inProgressCount,
+            'completedCount' => $completedCount,
+            'totalCount' => $totalCount,
+        ]);
     }
     public function logout()
     {
@@ -134,6 +163,41 @@ class AuthenticationController extends Controller
         $user->save();
         return redirect()->route('dashboard/index')->with('status', 'Password reset successfully.');
     }
+    public function checkin()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            if ($user->checkin && !$user->checkout) {
+                return redirect()->back()->with('info', 'You have already checked in and not checked out yet.');
+            }
+            $user->checkin = now()->timezone('Asia/Kolkata')->format('h:i:s');
+            $user->checkout = null;
+
+            $user->save();
+            return redirect()->back()->with('success', 'You have checked in.');
+        }
+        return redirect()->route('login');
+    }
+    public function checkout()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if (!$user->checkin) {
+                return redirect()->back()->with('info', 'You need to check in first.');
+            }
+            $checkoutTime = now()->timezone('Asia/Kolkata')->format('h:i:s');
+            $user->checkout = $checkoutTime;
+            $user->save();
+            $start = Carbon::parse($user->checkin);
+            $end = Carbon::parse($checkoutTime);
+            $durationMinutes = $start->diffInMinutes($end);
+            $hours = floor($durationMinutes / 60);
+            $minutes = $durationMinutes % 60;
+            return redirect()->back()->with('success', "Checked out. Total time: {$hours}h {$minutes}m");
+        }
+        return redirect()->route('login');
+    }
+
+   
 }
-
-

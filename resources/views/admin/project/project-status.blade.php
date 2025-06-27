@@ -32,15 +32,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ( $project_status as $status)
+                        @foreach ($project_status as $status)
                             <tr>
                                 <td>{{ $status->id }}</td>
-                                <td>{{$status->name }}</td>
-                                <td>{{$status->created_at }}</td>
+                                <td>{{ $status->name }}</td>
+                                <td>{{ $status->created_at }}</td>
                                 <td>
                                     <a href="{{ route('project-status.edit', $status->id) }}"><i
                                             class="fa-regular fa-pen-to-square fa-xl px-2"></i></a>
-                                    <a href="{{ route('project-status.destroy', $status->id) }}"><i class="fa-regular fa-trash-can fa-xl"></i></a>
+                                    <a href="{{ route('project-status.destroy', $status->id) }}"><i
+                                            class="fa-regular fa-trash-can fa-xl"></i></a>
                                 </td>
                             </tr>
                         @endforeach
@@ -53,7 +54,7 @@
 @section('customScript')
     @if (session('success'))
         <script type="text/javascript">
-            $(document).ready(function () {
+            $(document).ready(function() {
                 toastr.success("{{ session('success') }}");
             });
         </script>

@@ -60,22 +60,24 @@
                     </div>
                     <div class="col-md-6">
                         <label for="address" class="form-label">Address</label>
-                        <input class="form-control" type="text" name="address" value="{{ old('address', $user->address) }}">
+                        <input class="form-control" type="text" name="address"
+                            value="{{ old('address', $user->address) }}">
                     </div>
                     <div class="col-md-6">
                         <label for="state" class="form-label">State</label>
                         <input class="form-control" type="text" id="state" name="state"
-                            value="{{ old('state', $user->state)}} ">
+                            value="{{ old('state', $user->state) }} ">
                     </div>
                     <div class="col-md-6">
                         <label for="zipCode" class="form-label">Zip Code</label>
-                        <input type="text" class="form-control" id="" name="zipcode" placeholder="231465" maxlength="6"
-                            value="{{ old('zipcode', $user->zipcode) }}">
+                        <input type="text" class="form-control" id="" name="zipcode" placeholder="231465"
+                            maxlength="6" value="{{ old('zipcode', $user->zipcode) }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="country">Country</label>
                         <select id="country" class="select2 form-select" name="country">
-                            <option value="Australia" {{ old('country', $user->country) == 'Australia' ? 'selected' : '' }}>
+                            <option value="Australia"
+                                {{ old('country', $user->country) == 'Australia' ? 'selected' : '' }}>
                                 Australia</option>
                             <option value="France" {{ old('country', $user->country) == 'France' ? 'selected' : '' }}>
                                 France</option>
@@ -83,9 +85,12 @@
                                 Germany</option>
                             <option value="India" {{ old('country', $user->country) == 'India' ? 'selected' : '' }}>India
                             </option>
-                            <option value="United States" {{ old('country', $user->country) == 'United States' ? 'selected' : '' }}>United States</option>
+                            <option value="United States"
+                                {{ old('country', $user->country) == 'United States' ? 'selected' : '' }}>United States
+                            </option>
                         </select>
                     </div>
+
                     <div class="col-md-6">
                         <label for="language" class="form-label">Language</label>
                         <select id="language" class="select2 form-select" name="language">
@@ -93,11 +98,42 @@
                                 English</option>
                             <option value="Hindi" {{ old('language', $user->language) == 'Hindi' ? 'selected' : '' }}>
                                 Hindi</option>
-                            <option value="Gujarati" {{ old('language', $user->language) == 'Gujarati' ? 'selected' : '' }}>
+                            <option value="Gujarati"
+                                {{ old('language', $user->language) == 'Gujarati' ? 'selected' : '' }}>
                                 Gujarati</option>
                         </select>
                     </div>
+                    <div class="col-md-6">
+                        <label for="designation" class="form-label">Designation</label>
+                        <input class="form-control" type="text" name="designation"
+                            value="{{ old('designation', $user->designation) }}">
+                        @error('designation')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="department">Department</label>
+                        <select id="department" class="select2 form-select" name="department">
+                            <option value="">Select</option>
+                            <option value="web-devlopment">web-devlopment</option>
+                            <option value="seo">Search Engine Optimizetion</option>
+                            <option value="digital-marketing">Digital Marketing</option>
+                            <option value="smo">Social Media Optimizetion</option>
+                            <option value="aso">App Store Optimizetion</option>
+                            <option value="ui/ux">Ui/Ux Designer</option>
+                             <option value="graphic">Graphic</option>
+                            <option value="sales">Sales</option>
+                            <option value="content-marketing">Content Marketing</option>
+                            <option value="e-commarce-seo">E-Commarce-Seo</option>
+                            <option value="branding">Branding</option>
+                        </select>
+                        @error('department')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
+
+
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary me-3">Save changes</button>
                     <button type="reset" class="btn btn-outline-secondary">Cancel</button>
@@ -107,7 +143,6 @@
     </div>
     </div>
     </div>
-</div>
-</div>
-
+    </div>
+    </div>
 @endsection

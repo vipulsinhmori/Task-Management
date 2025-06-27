@@ -29,4 +29,13 @@ class Task extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function time()
+    {
+        return now()->format('H:i:s'); // Or your custom logic
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

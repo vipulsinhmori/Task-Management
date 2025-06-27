@@ -5,11 +5,13 @@ use App\Http\Controllers\admin\TaskController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\MetaController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ProjectStatusController;
 use App\Http\Controllers\TaskStatusController;
+use App\Models\Role;
 use Illuminate\Support\Facades\Route;
-
-
+use PHPUnit\Metadata\MetadataCollection;
 
 Route::get('/', [AuthenticationController::class, 'index'])->name('/sing');
 Route::post('login/', [AuthenticationController::class, 'login'])->name('login');
@@ -17,15 +19,24 @@ Route::get('/logout', [AuthenticationController::class, 'logout'])->name('logout
 
 Route::middleware(['Auth'])->group(function () {
 
+    Route::get('/moduale', [ModuleController::class, 'index'])->name('moduals');
+    Route::get('/module/project', [ModuleController::class, 'project'])->name('module.project');
+    Route::get('/module/employee', [ModuleController::class, 'employee'])->name('module.employee');
+    Route::get('/module/show/{id}', [ModuleController::class, 'show'])->name('employee.show');
+    Route::get('/module/view/{id}', [ModuleController::class, 'view'])->name('employee.view');
+
     Route::get('dashboard/index/', [AuthenticationController::class, 'dashboard'])->name('dashboard/index');
     Route::get('dashboard/profile/', [AuthenticationController::class, 'profile'])->name('dashboard/profile');
+    Route::get('user/checkin/',[AuthenticationController::class,'checkin'])->name('user.checkin');
+    Route::get('user/checkout/',[AuthenticationController::class,'checkout'])->name('user.checkout');
+    
     Route::get('/profile', [AuthenticationController::class, 'edit'])->name('profile.edit');
     Route::get('reset_password', [AuthenticationController::class, 'reset_password'])->name('reset_password');
+
     Route::post('/profile', [AuthenticationController::class, 'update'])->name('profile.update');
     Route::get('/register', [AuthenticationController::class, 'registe'])->name('registration');
     Route::post('/store', [AuthenticationController::class, 'store'])->name('store');
     Route::post('/password/update', [AuthenticationController::class, 'updatePassword'])->name('password.update.custom');
-
 
     Route::prefix('admin')->group(function () {
         Route::prefix('user')->group(function () {
@@ -38,14 +49,12 @@ Route::middleware(['Auth'])->group(function () {
             Route::post('/status/{id}', [UserController::class, 'status'])->name('user.status');
             Route::get('/restore/{id}', [UserController::class, 'restore'])->name('user.restore');
             Route::get('/trashed', [UserController::class, 'trashed'])->name('user.trashed');
+            Route::get('role/create/', [UserController::class,'createrole'])->name('role.create');
+            Route::post('role/store',[UserController::class,'storerole'])->name('role.store');
             Route::delete('/permanentDelete/{id}', [UserController::class, 'permanentDelete'])->name('user.permanentDelete');
-
         });
 
-Route::get('send-mail',[MailController::class,'sendEmail'])->name('sendEmail.index');
-
-
-
+        Route::get('send-mail', [MailController::class, 'sendEmail'])->name('sendEmail.index');
         Route::prefix('project')->group(function () {
             Route::get('index', [ProjectController::class, 'index'])->name('project.index');
             Route::get('create', [ProjectController::class, 'create'])->name('project.create');
@@ -54,8 +63,8 @@ Route::get('send-mail',[MailController::class,'sendEmail'])->name('sendEmail.ind
             Route::post('/update/{encodedId}', [ProjectController::class, 'update'])->name('project.update');
             Route::get('/delete/{id}', [ProjectController::class, 'delete'])->name('project.delete');
             Route::post('/status/{id}', [ProjectController::class, 'status'])->name('project.status');
-
         });
+
         Route::prefix('Task')->group(function () {
             Route::get('index', [TaskController::class, 'index'])->name('task.index');
             Route::get('create', [TaskController::class, 'create'])->name('task.create');
@@ -64,9 +73,14 @@ Route::get('send-mail',[MailController::class,'sendEmail'])->name('sendEmail.ind
             Route::post('/update/{encodedId}', [TaskController::class, 'update'])->name('task.update');
             Route::get('/delete/{id}', [TaskController::class, 'delete'])->name('task.delete');
             Route::post('/status/{id}', [TaskController::class, 'status'])->name('task.status');
-            Route::get('/task/{encodedId}/view', [TaskController::class, 'show'])->name('task.show');
+            Route::get('/task/{id}/duration', [TaskController::class, 'showTaskDuration'])->name('task.duration');
+            Route::get('/task/start/{id}', [TaskController::class, 'timestem'])->name('task.start');
 
+      // End a task
+            Route::get('/task/end/{id}', [TaskController::class, 'endTask'])->name('task.end');
+            Route::get('/task/{encodedId}/view', [TaskController::class, 'show'])->name('task.show');   
         });
+        
         Route::prefix('task-status')->group(function () {
             Route::get('/', [TaskStatusController::class, 'index'])->name('task-status.index');
             Route::get('/create', [TaskStatusController::class, 'create'])->name('task-status.create');
@@ -83,9 +97,12 @@ Route::get('send-mail',[MailController::class,'sendEmail'])->name('sendEmail.ind
             Route::post('/{id}', [ProjectStatusController::class, 'update'])->name('project-status.update');
             Route::get('/{id}', [ProjectStatusController::class, 'destroy'])->name('project-status.destroy');
         });
-          
     });
 });
+
+   Route::get('/index/meta',[MetaController::class,'index'])->name('meta.index');
+   Route::post('/add/meta',[MetaController::class,'store'])->name('meta.store');
+   
 
 Route::fallback(function () {
     return view('admin.error.404page');

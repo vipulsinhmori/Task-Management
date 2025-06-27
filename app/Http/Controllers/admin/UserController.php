@@ -1,12 +1,15 @@
 <?php
 
 namespace App\Http\Controllers\admin;
+
 use App\Models\User;
+use App\Models\Meta;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Role;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
@@ -16,17 +19,18 @@ class UserController extends Controller
             $user = Auth::user();
             if ($user->role_id == 2) {
                 $users = collect([$user]);
+                $meta = Meta::where('page_name', 'User List')->get();
             } else {
+                $meta = Meta::where('page_name', 'User List')->get();
                 $users = User::all();
             }
-            return view('admin.user.index', compact('users'));
+            return view('admin.user.index', compact('users', 'meta'));
         }
         return redirect()->route('login');
     }
-
     public function create()
     {
-        if (Auth::user()->role_id === 1) {
+        if (Auth::user()->role_id === 1 || Auth::user()->role_id === 3) {
             $users = Role::all();
             return view('admin.user.create', compact('users'));
         }
@@ -44,8 +48,10 @@ class UserController extends Controller
             'state' => 'required',
             'zipcode' => 'required',
             'country' => 'required',
-            'language' => 'required'
-
+            'designation' => 'required',
+            'language' => 'required',
+            'department' => 'required',
+            'role_id' => 'required'
         ]);
         $image = $request->file('image');
         $img_name = time() . '_' . rand(100000, 999999) . '_' . $request->image->getClientOriginalName();
@@ -59,13 +65,14 @@ class UserController extends Controller
         $user->address = $request->input('address');
         $user->number = $request->input('number');
         $user->state = $request->input('state');
+        $user->department = $request->input('department');
+        $user->designation = $request->input('designation');
         $user->zipcode = $request->input('zipcode');
         $user->country = $request->input('country');
         $user->language = $request->input('language');
         $user->status = 1;
         $user->image = isset($img_name) ? $img_name : null;
         $user->password = bcrypt($request->input('password'));
-        // dd($user->toArray());
         $user->save();
         return redirect()->route('user.index')->with('success', 'User created successfully!');
     }
@@ -81,6 +88,8 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string',
             'email' => 'required',
+            'designation' => 'required',
+            'department' => 'required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg',
         ]);
         $user = User::findOrFail($id);
@@ -97,23 +106,22 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->address = $request->address;
         $user->number = $request->number;
+        $user->department = $request->department;
         $user->state = $request->state;
+        $user->designation = $request->designation;
         $user->zipcode = $request->zipcode;
         $user->country = $request->country;
         $user->language = $request->language;
-
         $user->image = isset($img_name) ? $img_name : $user->image;
         $user->save();
         return redirect()->route('user.index')->with('success', 'User Updated Successfully');
     }
-
     public function delete($id)
     {
         $user = User::findOrFail($id);
         $user->delete();
         return redirect()->route('user.index')->with('success', 'User Deleted Successfully!');
     }
-
     public function status(Request $request, $id)
     {
         $request->validate([
@@ -130,8 +138,6 @@ class UserController extends Controller
         }
         return response()->json(['success' => false, 'message' => 'User not found.'], 404);
     }
-
-
     public function profile_edit($encodedId)
     {
         $id = Crypt::decrypt($encodedId);
@@ -164,32 +170,46 @@ class UserController extends Controller
         $user->save();
         return redirect()->route('dashboard/profile')->with('success', 'Updated  Successfully');
     }
-
-   public function trashed()
-{
-    $deletedUsers = User::onlyTrashed()->get();
-    return view('admin.user.trashed', compact('deletedUsers'));
-}
-
-public function restore($id)
-{
-    $user = User::withTrashed()->findOrFail($id);
-    $user->restore();
-
-    return redirect()->route('user.index')->with('success', 'User restored successfully!');
-}
-
-public function permanentDelete($id)
-{
-    $user = User::withTrashed()->findOrFail($id);
-
-    if ($user->image && file_exists(public_path($user->image))) {
-        unlink(public_path($user->image)); 
+    public function trashed()
+    {
+        $deletedUsers = User::onlyTrashed()->get();
+        return view('admin.user.trashed', compact('deletedUsers'));
+    }
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+        return redirect()->route('user.index')->with('success', 'User restored successfully!');
+    }
+    public function permanentDelete($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        if ($user->image && file_exists(public_path($user->image))) {
+            unlink(public_path($user->image));
+        }
+        $user->delete();
+        return redirect()->route('user.index')->with('success', 'User permanently deleted successfully!');
     }
 
-    $user->delete();
-    return redirect()->route('user.index')->with('success', 'User permanently deleted successfully!');
-}
+    public function createrole()
+    {
+        return view('admin.user.role');
+    }
+    public function storerole(Request $request)
+    {
+        $request->validate([
+            'name' => 'required'
+        ]);
+        $role = new Role();
+        $role->name = $request->input('name');
+        $role->save();
+        return redirect()->back();
+    }
 
+    //   session([
+    //     'user_id' => $user->id,
+    //     'user_name' => $user->name,
+    //     'user_email' => $user->email,
+    // ]);
 
 }

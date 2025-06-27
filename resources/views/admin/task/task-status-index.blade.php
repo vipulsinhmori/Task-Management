@@ -35,12 +35,14 @@
                     <tbody>
                         @foreach ($status as $tkstatus)
                             <tr>
-                              <td> {{ $tkstatus->id }}</td>
-                              <td> {{ $tkstatus->name }}</td>
-                              <td> {{ $tkstatus->created_at }}</td>
-                              <td>  <a href="{{ route('task-status.edit',  $tkstatus->id) }}"><i
+                                <td> {{ $tkstatus->id }}</td>
+                                <td> {{ $tkstatus->name }}</td>
+                                <td> {{ $tkstatus->created_at }}</td>
+                                <td> <a href="{{ route('task-status.edit', $tkstatus->id) }}"><i
                                             class="fa-regular fa-pen-to-square fa-xl px-2"></i></a>
-                                    <a href="{{ route('task-status.destroy',  $tkstatus->id) }}"><i class="fa-regular fa-trash-can fa-xl"></i></a> </td>
+                                    <a href="{{ route('task-status.destroy', $tkstatus->id) }}"><i
+                                            class="fa-regular fa-trash-can fa-xl"></i></a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -48,12 +50,11 @@
             </div>
         </div>
     </div>
-
 @endsection
 @section('customScript')
     @if (session('success'))
         <script type="text/javascript">
-            $(document).ready(function () {
+            $(document).ready(function() {
                 toastr.success("{{ session('success') }}");
             });
         </script>

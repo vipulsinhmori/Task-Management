@@ -14,153 +14,225 @@
             </div>
         </div>
         <ul class="navbar-nav flex-row align-items-center ms-auto">
-            <li class="nav-item dropdown me-4">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
-                    data-bs-auto-close="outside" aria-expanded="true">
-                    <span class="position-relative">
-                        <i class="icon-base bx bx-bell icon-md"></i>
-                        <span class="status-dot"></span>
-                    </span>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle pt-4 hide-arrow" href="#" id="userDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    @php
+                        $user = Auth::check() ? Auth::user() : null;
+                    @endphp
+                    @if ($user)
+                        @if ($user->checkin && !$user->checkout)
+                            <span class="radix-icons--dot-filled"></span>
+                        @elseif ($user->checkout)
+                            <span class="icon-park-outline--dot"></span>
+                        @endif
+                    @endif
                 </a>
-                @php
-                    use App\Models\Task;
-                    use App\Models\User;
-                    use Illuminate\Support\Facades\Auth;
-                    $user = Auth::user();
-                    $tasks = [];
-                    if ($user && $user->role_id == 2) {
-                        $tasks = Task::with(['project', 'assignedTo', 'creator', 'status'])->where('assigned_to', $user->id)->latest()->take(10)->get();
-                    } else {
-                        $tasks = Task::with(['project', 'assignedTo', 'creator', 'status'])->latest()->take(4)->get();
-                    }
-                @endphp
-                <ul class="dropdown-menu dropdown-menu-end p-0 notification" data-bs-popper="static">
-                    <li class="dropdown-menu-header border-bottom">
-                        <div class="dropdown-header d-flex align-items-center py-3">
-                            <h6 class="mb-0 me-auto">Assigned Task</h6>
-                            <div class="d-flex align-items-center h6 mb-0">
-                                <span class="badge bg-label-primary me-2">{{ $tasks->count() }}</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="dropdown-notifications-list scrollable-container ps ps--active-y">
-                        <ul class="list-group list-group-flush">
-                            @forelse ($tasks as $task)
-                                <li class="list-group-item dropdown-notifications-item p-3">
-                                    <div class="d-flex align-items-start gap-3">
-                                        <div class="flex-shrink-0">
-                                            <img src="{{ $task->assignedTo->getImageUrl() }}" alt="User Image"
-                                                class="rounded-circle border" width="50" height="50">
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <h6 class="mb-1 fw-semibold">
-                                                        {{ $task->assignedTo->name ?? 'Unknown User' }}</h6>
-                                                    <p class="mb-0 text-muted small">
-                                                        {{ $task->title ?? 'Untitled Task' }}</p>
-                                                </div>
-                                                <div class="text-end">
-                                                    <small
-                                                        class="text-body-secondary">{{ $task->created_at->diffForHumans() }}</small>
-                                                </div>
-                                            </div>
-                                            <div class="mt-2">
-                                                <small class="d-block text-body"><strong>Project:</strong>
-                                                    {{ $task->project->name ?? 'N/A' }}</small>
-                                                <small class="d-block text-body">
-                                                    <strong>Status:</strong>
-                                                    @switch($task->status)
-                                                        @case(1)
-                                                            <span class="badge bg-secondary">Open</span>
-                                                        @break
-
-                                                        @case(2)
-                                                            <span class="badge bg-primary">In Progress</span>
-                                                        @break
-
-                                                        @case(3)
-                                                            <span class="badge bg-warning text-dark">Completed</span>
-                                                        @break
-
-                                                        @case(4)
-                                                            <span class="badge bg-success">On Hold</span>
-                                                        @break
-
-                                                        @default
-                                                            <span class="badge bg-dark">Unknown</span>
-                                                    @endswitch
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <a href="javascript:void(0)" class="text-muted" title="Dismiss">
-                                                <i class="bx bx-x fs-5"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </li>
-                                @empty
-                                    <li class="list-group-item text-center text-muted">No tasks assigned.</li>
-                                @endforelse
-                            </ul>
-                        </li>
-                        <li class="border-top">
-                            <div class="d-grid p-3">
-                                <a class="btn btn-sm btn-primary w-100" href="">
-                                    <small>View All Tasks</small>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="#" id="userDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="avatar avatar-online">
-                            @if (Auth::check())
-                                {!! Auth::user()->getImage() !!}
-                            @else
-                                <img src="../default-avatar.png" alt="Guest" class="w-px-40 h-auto rounded-circle" />
-                            @endif
-                        </div>
-                    </a>
+                @if ($user)
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar avatar-online me-3">
-                                        @if (Auth::check())
-                                            {!! Auth::user()->getImage() !!}
-                                        @else
-                                            <img src="../default-avatar.png" alt="Guest"
-                                                class="w-px-40 h-auto rounded-circle" />
-                                        @endif
+                        @if (!$user->checkin)
+                            <li>
+                                <a class="dropdown-item" href="{{ route('user.checkin') }}">
+                                    <i class="fa-solid fa-check me-2"></i> Check In
+                                </a>
+                            </li>
+                        @elseif ($user->checkin && !$user->checkout)
+                            <li>
+                                <a class="dropdown-item" href="{{ route('user.checkout') }}">
+                                    <i class="mdi--lock-check-outline me-2"></i> Check Out
+                                </a>
+                            </li>
+                        @else
+                            <li>
+                                <a class="dropdown-item" href="{{ route('user.checkin') }}">
+                                    <i class="fa-solid fa-check me-2"></i> Check In
+                                </a>
+                            </li>
+                    </ul>
+                @endif
+                @endif
+            </li>
+        </ul>
+        <li class="nav-item dropdown me-4">
+            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="true">
+                <span class="position-relative">
+                    <i class="icon-base bx bx-bell icon-md"></i>
+                    <span class="status-dot"></span>
+                </span>
+            </a>
+            @php
+                use App\Models\Task;
+                use App\Models\User;
+                use Illuminate\Support\Facades\Auth;
+                $user = Auth::user();
+                $tasks = [];
+                if ($user && $user->role_id == 2) {
+                    $tasks = Task::with(['project', 'assignedTo', 'creator', 'status'])
+                        ->where('assigned_to', $user->id)
+                        ->latest()
+                        ->take(4)
+                        ->get();
+                } else {
+                    $tasks = Task::with(['project', 'assignedTo', 'creator', 'status'])
+                        ->latest()
+                        ->take(4)
+                        ->get();
+                }
+            @endphp
+            <ul class="dropdown-menu dropdown-menu-end p-0 notification" data-bs-popper="static">
+                <li class="dropdown-menu-header border-bottom">
+                    <div class="dropdown-header d-flex align-items-center py-3">
+                        <h6 class="mb-0 me-auto">Assigned Task</h6>
+                        <div class="d-flex align-items-center h6 mb-0">
+                            <span class="badge bg-label-primary me-2">{{ $tasks->count() }}</span>
+                        </div>
+                    </div>
+                </li>
+                <li class="dropdown-notifications-list scrollable-container ps ps--active-y">
+                    <ul class="list-group list-group-flush">
+                        @forelse ($tasks as $task)
+                            <li class="list-group-item dropdown-notifications-item p-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="flex-shrink-0">
+                                        <img src="{{ $task->assignedTo->getImageUrl() }}" alt="User Image"
+                                            class="rounded-circle border" width="50" height="50">
                                     </div>
-                                    <div>
-                                        @if (Auth::check())
-                                            <span>{{ Auth::user()->name }}</span>
-                                        @else
-                                            <span>Guest</span>
-                                        @endif
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">
+                                                    {{ $task->assignedTo->name ?? 'Unknown User' }}</h6>
+                                                <p class="mb-0 text-muted small">
+                                                    {{ $task->title ?? 'Untitled Task' }}</p>
+                                            </div>
+                                            <div class="text-end">
+                                                <small
+                                                    class="text-body-secondary">{{ $task->created_at->diffForHumans() }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="d-block text-body"><strong>Project:</strong>
+                                                {{ $task->project->name ?? 'N/A' }}</small>
+                                            <small class="d-block text-body">
+                                                <strong>Status:</strong>
+                                                @switch($task->status)
+                                                    @case(1)
+                                                        <span class="badge bg-secondary">Open</span>
+                                                    @break
+
+                                                    @case(2)
+                                                        <span class="badge bg-primary">In Progress</span>
+                                                    @break
+
+                                                    @case(3)
+                                                        <span class="badge bg-warning text-dark">Completed</span>
+                                                    @break
+
+                                                    @case(4)
+                                                        <span class="badge bg-success">On Hold</span>
+                                                    @break
+
+                                                    @default
+                                                        <span class="badge bg-dark">Unknown</span>
+                                                @endswitch
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <a href="javascript:void(0)" class="text-muted dismiss-task-btn"
+                                            title="Dismiss">
+                                            <i class="bx bx-x fs-5"></i>
+                                        </a>
+
                                     </div>
                                 </div>
+                            </li>
+                            @empty
+                                <li class="list-group-item text-center text-muted">No tasks assigned.</li>
+                            @endforelse
+                        </ul>
+                    </li>
+                    <li class="border-top">
+                        <div class="d-grid p-3">
+                            <a class="btn btn-sm btn-primary w-100" href="">
+                                <small>View All Tasks</small>
                             </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bx bx-user me-2"></i>My
-                                Profile</a></li>
-                        <li><a class="dropdown-item" href="{{ route('reset_password') }}"><i
-                                    class="bx bx-cog me-2"></i>Reset Password</a></li>
-                        <li>
-                            <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="{{ route('logout') }}"><i class="bx bx-power-off me-2"></i>Log
-                                Out</a></li>
-                    </ul>
-                </li>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="#" id="userDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="avatar avatar-online">
+                        @if (Auth::check())
+                            {!! Auth::user()->getImage() !!}
+                        @else
+                            <img src="../default-avatar.png" alt="Guest" class="w-px-40 h-auto rounded-circle" />
+                        @endif
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-online me-3">
+                                    @if (Auth::check())
+                                        {!! Auth::user()->getImage() !!}
+                                    @else
+                                        <img src="../default-avatar.png" alt="Guest"
+                                            class="w-px-40 h-auto rounded-circle" />
+                                    @endif
+                                </div>
+                                @php
+                                    $user = Auth::user();
+                                @endphp
+                                @if (Auth::check())
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1 fw-semibold">{{ $user->name }}</h6>
+                                            <p class="mb-0 text-muted small">
+                                                @if ($user->role_id == 1)
+                                                    <small>Admin</small>
+                                                @elseif ($user->role_id == 3)
+                                                    <small>Manager</small>
+                                                @else
+                                                    <small>Employee</small>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider" />
+                    </li>
+                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bx bx-user me-2"></i>My
+                            Profile</a></li>
+                    <li><a class="dropdown-item" href="{{ route('reset_password') }}"><i
+                                class="bx bx-cog me-2"></i>Reset Password</a></li>
+                    <li>
+                        <hr class="dropdown-divider" />
+                    </li>
+                    <li><a class="dropdown-item" href="{{ route('logout') }}"><i class="bx bx-power-off me-2"></i>Log
+                            Out</a></li>
+                </ul>
+            </li>
             </ul>
         </div>
     </nav>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.dismiss-task-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const taskItem = this.closest('.dropdown-notifications-item');
+                    if (taskItem) {
+                        taskItem.remove();
+                    }
+                });
+            });
+        });
+    </script>
