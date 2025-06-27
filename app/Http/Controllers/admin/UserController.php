@@ -205,7 +205,13 @@ class UserController extends Controller
         $role->save();
         return redirect()->back();
     }
-
+       public function roleindex()
+       {
+        $roles = Role::all();
+        return view('admin.user.roleindex',complact('roles'));
+       }
+   
+    
     //   session([
     //     'user_id' => $user->id,
     //     'user_name' => $user->name,
