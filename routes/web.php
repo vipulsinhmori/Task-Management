@@ -100,10 +100,10 @@ Route::middleware(['Auth'])->group(function () {
     });
 });
 
-   Route::get('/index/meta',[MetaController::class,'index'])->name('meta.index');
-   Route::post('/add/meta',[MetaController::class,'store'])->name('meta.store');
+//    Route::get('/index/meta',[MetaController::class,'index'])->name('meta.index');
+//    Route::post('/add/meta',[MetaController::class,'store'])->name('meta.store');
    
 
-Route::fallback(function () {
-    return view('admin.error.404page');
-});
+// Route::fallback(function () {
+//     return view('admin.error.404page');
+// });
