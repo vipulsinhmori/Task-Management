@@ -34,7 +34,7 @@ Route::middleware(['Auth'])->group(function () {
     Route::get('reset_password', [AuthenticationController::class, 'reset_password'])->name('reset_password');
 
     Route::post('/profile', [AuthenticationController::class, 'update'])->name('profile.update');
-    Route::get('/register', [AuthenticationController::class, 'registe'])->name('registration');
+    // Route::get('/register', [AuthenticationController::class, 'registe'])->name('registration');
     Route::post('/store', [AuthenticationController::class, 'store'])->name('store');
     Route::post('/password/update', [AuthenticationController::class, 'updatePassword'])->name('password.update.custom');
 
